@@ -26,6 +26,7 @@ Route::get('/management', function () {
     return view('management.index');
 });
 
+// Routes for cashier
 Route::get('/cashier', 'Cashier\CashierController@index');
 Route::get('/cashier/getMenuByCategory/{category_id}', 'Cashier\CashierController@getMenuByCategory');
 Route::get('/cashier/getTable', 'Cashier\CashierController@getTables');
@@ -41,6 +42,11 @@ Route::post('/cashier/confirmOrderStatus', 'Cashier\CashierController@confirmOrd
 Route::post('/cashier/savePayment', 'Cashier\CashierController@savePayment');
 Route::get('/cashier/showReceipt/{saleID}', 'Cashier\CashierController@showReceipt');
 
+// Routes for management
 Route::resource('management/category', 'Management\CategoryController');
 Route::resource('management/menu', 'Management\MenuController');
 Route::resource('management/table', 'Management\TableController');
+
+// Routes for report
+Route::get('/report', 'Report\ReportController@index');
+Route::get('/report/show', 'Report\ReportController@show');
