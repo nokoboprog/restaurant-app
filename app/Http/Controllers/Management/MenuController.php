@@ -47,7 +47,10 @@ class MenuController extends Controller
             'category_id' => 'required|numeric'
         ]);
 
+        // if a user does not uploade an image, use noimge.png for the menu
         $imageName = "noimage.png";
+
+        // if a user upload image
         if ($request->image) {
             $request->validate([
                 'image' => 'nullable|file|image|mimes:jpeg,png,jpg|max:5000'
@@ -57,6 +60,7 @@ class MenuController extends Controller
             $request->image->move(public_path('menu_images'), $imageName);
         }
 
+        // save information to Menus table
         $menu = new Menu();
         $menu->name = $request->name;
         $menu->price = $request->price;
@@ -103,6 +107,7 @@ class MenuController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // information validation
         $request->validate([
             'name' => 'required|max:255',
             'price' => 'required|numeric',
@@ -110,6 +115,8 @@ class MenuController extends Controller
         ]);
 
         $menu = Menu::find($id);
+
+        // validate if a user upload image
         if ($request->image) {
             $request->validate([
                 'image' => 'nullable|file|image|mimes:jpeg,png,jpg|max:5000'

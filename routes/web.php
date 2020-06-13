@@ -14,39 +14,42 @@ use Illuminate\Support\Facades\Auth;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', 'HomeController@index');
 
-Auth::routes();
+Auth::routes(['register' => false, 'reset' => false]);
 
 Route::get('/home', 'HomeController@index')->name('home');
 
-Route::get('/management', function () {
-    return view('management.index');
+Route::middleware(['auth'])->group(function () {
+    // Routes for cashier
+    Route::get('/cashier', 'Cashier\CashierController@index');
+    Route::get('/cashier/getMenuByCategory/{category_id}', 'Cashier\CashierController@getMenuByCategory');
+    Route::get('/cashier/getTable', 'Cashier\CashierController@getTables');
+    Route::get(
+        '/cashier/getSaleDetailsByTable/{table_id}',
+        'Cashier\CashierController@getSaleDetailsByTable'
+    );
+
+    Route::post('/cashier/orderFood', 'Cashier\CashierController@orderFood');
+    Route::post('/cashier/deleteSaleDetail', 'Cashier\CashierController@deleteSaleDetail');
+
+    Route::post('/cashier/confirmOrderStatus', 'Cashier\CashierController@confirmOrderStatus');
+    Route::post('/cashier/savePayment', 'Cashier\CashierController@savePayment');
+    Route::get('/cashier/showReceipt/{saleID}', 'Cashier\CashierController@showReceipt');
 });
 
-// Routes for cashier
-Route::get('/cashier', 'Cashier\CashierController@index');
-Route::get('/cashier/getMenuByCategory/{category_id}', 'Cashier\CashierController@getMenuByCategory');
-Route::get('/cashier/getTable', 'Cashier\CashierController@getTables');
-Route::get(
-    '/cashier/getSaleDetailsByTable/{table_id}',
-    'Cashier\CashierController@getSaleDetailsByTable'
-);
+Route::middleware(['auth', 'VerifyAdmin'])->group(function () {
+    Route::get('/management', function () {
+        return view('management.index');
+    });
 
-Route::post('/cashier/orderFood', 'Cashier\CashierController@orderFood');
-Route::post('/cashier/deleteSaleDetail', 'Cashier\CashierController@deleteSaleDetail');
+    // Routes for management
+    Route::resource('management/category', 'Management\CategoryController');
+    Route::resource('management/menu', 'Management\MenuController');
+    Route::resource('management/table', 'Management\TableController');
+    Route::resource('management/user', 'Management\UserController');
 
-Route::post('/cashier/confirmOrderStatus', 'Cashier\CashierController@confirmOrderStatus');
-Route::post('/cashier/savePayment', 'Cashier\CashierController@savePayment');
-Route::get('/cashier/showReceipt/{saleID}', 'Cashier\CashierController@showReceipt');
-
-// Routes for management
-Route::resource('management/category', 'Management\CategoryController');
-Route::resource('management/menu', 'Management\MenuController');
-Route::resource('management/table', 'Management\TableController');
-
-// Routes for report
-Route::get('/report', 'Report\ReportController@index');
-Route::get('/report/show', 'Report\ReportController@show');
+    // Routes for report
+    Route::get('/report', 'Report\ReportController@index');
+    Route::get('/report/show', 'Report\ReportController@show');
+});

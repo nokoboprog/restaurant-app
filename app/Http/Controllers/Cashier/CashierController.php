@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 
 class CashierController extends Controller
 {
+    // First Page of Cashier
     public function index()
     {
         $categories = Category::all();
@@ -74,6 +75,7 @@ class CashierController extends Controller
             ->where('sale_status', 'unpaid')
             ->first();
 
+        // if there is no sale for the selected table, create a new sale record
         if (!$sale) {
             $user = Auth::user();
             $sale = new Sale();
@@ -84,6 +86,7 @@ class CashierController extends Controller
             $sale->save();
             $sale_id = $sale->id;
 
+            // update table status
             $table = Table::find($table_id);
             $table->status = "unavailable";
             $table->save();
@@ -91,6 +94,7 @@ class CashierController extends Controller
             $sale_id = $sale->id;
         }
 
+        // add ordered menu to the sale_details table
         $saleDetail = new SaleDetail();
         $saleDetail->sale_id = $sale_id;
         $saleDetail->menu_id = $menu->id;
@@ -99,6 +103,7 @@ class CashierController extends Controller
         $saleDetail->quantity = $request->quantity;
         $saleDetail->save();
 
+        // update total price in the sales table
         $sale->total_price = $sale->total_price + ($request->quantity * $menu->price);
         $sale->save();
 
@@ -123,6 +128,7 @@ class CashierController extends Controller
 
     private function getSaleDetails($sale_id)
     {
+        // list all saledetail
         $html = '<p>Sale ID: ' . $sale_id . '</p>';
         $saleDetails = SaleDetail::where('sale_id', $sale_id)->get();
         $html .= '<div class="table-responsive-md" style="overflow-y:scroll; 
@@ -193,10 +199,12 @@ class CashierController extends Controller
         $menu_price = ($saleDetail->menu_price * $saleDetail->quantity);
         $saleDetail->delete();
 
+        // update total price
         $sale = Sale::find($sale_id);
         $sale->total_price = $sale->total_price - $menu_price;
         $sale->save();
 
+        // check if there any saledetail having the sale id 
         $saleDetails = SaleDetail::where('sale_id', $sale_id)->first();
         if ($saleDetail) {
             $html = $this->getSaleDetails($sale_id);
